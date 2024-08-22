@@ -1,0 +1,80 @@
+name: Build and Publish Docker Images
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      - name: Build and tag DB Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/db:$TAG_NAME ./services/db
+          docker tag ghcr.io/${{ secrets.GHCR_USERNAME }}/db:$TAG_NAME ghcr.io/${{ secrets.GHCR_USERNAME }}/db:latest
+
+      - name: Push DB Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/db:$TAG_NAME
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/db:latest
+
+      - name: Build and tag Order Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/order:$TAG_NAME ./services/order
+          docker tag ghcr.io/${{ secrets.GHCR_USERNAME }}/order:$TAG_NAME ghcr.io/${{ secrets.GHCR_USERNAME }}/order:latest
+
+      - name: Push Order Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/order:$TAG_NAME
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/order:latest
+
+      - name: Build and tag Payment Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/payment:$TAG_NAME ./services/payment
+          docker tag ghcr.io/${{ secrets.GHCR_USERNAME }}/payment:$TAG_NAME ghcr.io/${{ secrets.GHCR_USERNAME }}/payment:latest
+
+      - name: Push Payment Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/payment:$TAG_NAME
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/payment:latest
+
+      - name: Build and tag Product Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/product:$TAG_NAME ./services/product
+          docker tag ghcr.io/${{ secrets.GHCR_USERNAME }}/product:$TAG_NAME ghcr.io/${{ secrets.GHCR_USERNAME }}/product:latest
+
+      - name: Push Product Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/product:$TAG_NAME
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/product:latest
+
+      - name: Build and tag User Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/user:$TAG_NAME ./services/user
+          docker tag ghcr.io/${{ secrets.GHCR_USERNAME }}/user:$TAG_NAME ghcr.io/${{ secrets.GHCR_USERNAME }}/user:latest
+
+      - name: Push User Docker image
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/user:$TAG_NAME
+          docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/user:latest
