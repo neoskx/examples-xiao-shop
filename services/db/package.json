@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "migration:dev": "DEBUG=* dotenv -e ./.env -c -- prisma migrate dev",
+    "migration:generate": "DEBUG=* dotenv -e ./.env -c -- prisma migrate dev",
     "migration:deploy": "DEBUG=* dotenv -e ./.env -c -- prisma migrate deploy"
   },
   "dependencies": {
