@@ -3,8 +3,9 @@ FROM node:22
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+COPY yarn.lock ./
+RUN yarn
 
 COPY . .
 
-CMD ["npm", "run", "migrate:deploy"]
+CMD ["npm", "start"]

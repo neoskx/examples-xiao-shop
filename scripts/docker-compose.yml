@@ -1,0 +1,77 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: xiaoshop123
+      POSTGRES_DB: xiaoshop
+    ports:
+      - "5432:5432" # Publicly exposed port
+    expose:
+      - "5432" # Internal port, not publicly exposed
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xiaoshop"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: db-service:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
+
+  gateway:
+    image: gateway-service:latest
+    ports:
+      - "3000:3000" # Publicly exposed port
+    depends_on:
+      - db
+      - order
+      - payment
+      - product
+      - user
+    environment:
+      - ORDER_SERVICE=http://order:3010
+      - PAYMENT_SERVICE=http://payment:3020
+      - PRODUCT_SERVICE=http://product:3030
+      - USER_SERVICE=http://user:3040
+
+  order:
+    image: order-service:latest
+    environment:
+      DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
+    depends_on:
+      - db
+    expose:
+      - "3010" # Internal port, not publicly exposed
+
+  payment:
+    image: payment-service:latest
+    environment:
+      DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
+    depends_on:
+      - db
+    expose:
+      - "3020" # Internal port, not publicly exposed
+
+  product:
+    image: product-service:latest
+    environment:
+      DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
+    depends_on:
+      - db
+    expose:
+      - "3030" # Internal port, not publicly exposed
+
+  user:
+    image: user-service:latest
+    environment:
+      DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
+    depends_on:
+      - db
+    expose:
+      - "3040" # Internal port, not publicly exposed

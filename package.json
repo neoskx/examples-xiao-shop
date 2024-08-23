@@ -2,7 +2,10 @@
   "name": "examples_xiao_shop",
   "version": "0.1.0",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "docker:build": "sh ./scripts/build_docker_images.sh",
+    "docker-compose:start": "cd scripts && sh ./start_docker_compose.sh"
+  },
   "dependencies": {
     "debug": "^4.3.6"
   },

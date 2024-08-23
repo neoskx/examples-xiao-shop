@@ -14,11 +14,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+console.log(process.env);
+
 app.use(
   '/v1/api/login',
   createProxyMiddleware({
     // logger: console,
-    target: process.env.USER_SERVICE || 'http://localhost:3040/v1/api/login',
+    target: process.env.USER_SERVICE
+      ? `${process.env.USER_SERVICE}/v1/api/login`
+      : 'http://localhost:3040/v1/api/login',
     changeOrigin: true,
   }),
 );
@@ -41,7 +45,9 @@ app.use((req, res, next) => {
 app.use(
   '/v1/api/orders',
   createProxyMiddleware({
-    target: process.env.ORDER_SERVICE || 'http://localhost:3010/v1/api/orders',
+    target: process.env.ORDER_SERVICE
+      ? `${process.env.ORDER_SERVICE}/v1/api/login`
+      : 'http://localhost:3010/v1/api/orders',
     changeOrigin: true,
   }),
 );
@@ -49,7 +55,9 @@ app.use(
 app.use(
   '/v1/api/payments',
   createProxyMiddleware({
-    target: process.env.PAYMENT_SERVICE || 'http://localhost:3020/v1/api/payments',
+    target: process.env.PAYMENT_SERVICE
+      ? `${process.env.PAYMENT_SERVICE}/v1/api/login`
+      : 'http://localhost:3020/v1/api/payments',
     changeOrigin: true,
   }),
 );
@@ -57,7 +65,9 @@ app.use(
 app.use(
   '/v1/api/products',
   createProxyMiddleware({
-    target: process.env.PRODUCT_SERVICE || 'http://localhost:3030/v1/api/products',
+    target: process.env.PRODUCT_SERVICE
+      ? `${process.env.PRODUCT_SERVICE}/v1/api/login`
+      : 'http://localhost:3030/v1/api/products',
     changeOrigin: true,
   }),
 );

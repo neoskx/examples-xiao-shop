@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "migration:generate": "DEBUG=* dotenv -e ./.env -c -- prisma migrate dev",
-    "migration:deploy": "DEBUG=* dotenv -e ./.env -c -- prisma migrate deploy"
+    "migration:deploy": "DEBUG=* dotenv -e ./.env -c -- prisma migrate deploy",
+    "start": "DEBUG=* prisma migrate deploy"
   },
   "dependencies": {
     "debug": "^4.3.6",
