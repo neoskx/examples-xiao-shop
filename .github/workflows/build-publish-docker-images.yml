@@ -6,7 +6,7 @@ on:
       - created
 
 jobs:
-  build-and-publish:
+  build-and-publish-docker-images:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +17,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Log in to GitHub Container Registry
-        run: echo "token - ${{ secrets.GHCR_TOKEN }}" | echo "actor - ${{github.actor}}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
 
       - name: Build and tag DB Docker image
         run: |
