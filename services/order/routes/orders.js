@@ -2,6 +2,7 @@ const express = require('express');
 // const debug = require('debug')('order:api');
 const { Kafka } = require('kafkajs');
 const { Pool } = require('pg');
+const kafkaConfig = require('../helpers/kafka');
 
 const router = express.Router();
 console.log(process.env.DATABASE_URL);
@@ -19,7 +20,7 @@ async function getPGPool() {
   try {
     await new Promise((resolve, reject) => {
       _pool.connect((err, client, done) => {
-        if (err){
+        if (err) {
           reject(err);
           throw err;
         }
@@ -42,7 +43,7 @@ async function getPGPool() {
   return _pool;
 }
 
-const kafka = new Kafka({ brokers: ['kafka:9092'] });
+const kafka = new Kafka({ brokers: kafkaConfig.borkers, clientId: 'order-service' });
 const producer = kafka.producer();
 
 router.get('/', async (req, res) => {
@@ -58,7 +59,7 @@ router.post('/', async (req, res) => {
   //   [...order],
   // );
   await producer.send({
-    topic: 'order-created',
+    topic: kafkaConfig.orderCreatedTopic,
     messages: [{ value: JSON.stringify(order) }],
   });
   res.status(201).send('Order received');

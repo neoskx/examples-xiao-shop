@@ -2,6 +2,7 @@ const express = require('express');
 // const debug = require('debug')('payment:api');
 const { Kafka } = require('kafkajs');
 const { Pool } = require('pg');
+const kafkaConfig = require('../helpers/kafka');
 
 const router = express.Router();
 console.log(process.env.DATABASE_URL);
@@ -44,11 +45,11 @@ async function getPGPool() {
 }
 
 function init() {
-  if(_inited_) return
-  const kafka = new Kafka({ brokers: ['kafka:9092'] });
+  if (_inited_) return;
+  const kafka = new Kafka({ brokers: kafkaConfig.borkers });
   const consumer = kafka.consumer({ groupId: 'payment-group' });
   consumer.connect();
-  consumer.subscribe({ topic: 'order-created', fromBeginning: true });
+  consumer.subscribe({ topic: kafkaConfig.orderCreatedTopic, fromBeginning: true });
 
   consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
@@ -58,4 +59,4 @@ function init() {
   });
 }
 
-module.exports = {init};
+module.exports = { init };

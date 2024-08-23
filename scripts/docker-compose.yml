@@ -1,7 +1,17 @@
 version: "3.8"
+x-defaults: &default_resources
+  deploy:
+    resources:
+      limits:
+        cpus: "1.00" # Limit to 1 CPU core (Swarm mode)
+        memory: "1G" # Limit to 1GB of memory (Swarm mode)
+      reservations:
+        cpus: "0.25" # Reserve 25% of a CPU core (Swarm mode)
+        memory: "256M" # Reserve 256MB of memory (Swarm mode)
 services:
   postgres:
     image: postgres:16
+    <<: *default_resources # Apply default resources
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: xiaoshop123
@@ -18,14 +28,79 @@ services:
 
   db:
     image: db-service:latest
+    <<: *default_resources # Apply default resources
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    <<: *default_resources # Apply default resources
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    <<: *default_resources # Apply default resources
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+    ports:
+      - "9092:9092"
+
+  kafka2:
+    image: confluentinc/cp-kafka:latest
+    <<: *default_resources # Apply default resources
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+    ports:
+      - "9093:9093"
+
+  kafka3:
+    image: confluentinc/cp-kafka:latest
+    <<: *default_resources # Apply default resources
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+    ports:
+      - "9094:9094"
+
   gateway:
     image: gateway-service:latest
+    <<: *default_resources # Apply default resources
     ports:
       - "3000:3000" # Publicly exposed port
     depends_on:
@@ -34,6 +109,9 @@ services:
       - payment
       - product
       - user
+      - kafka1
+      - kafka2
+      - kafka3
     environment:
       - ORDER_SERVICE=http://order:3010
       - PAYMENT_SERVICE=http://payment:3020
@@ -42,24 +120,37 @@ services:
 
   order:
     image: order-service:latest
+    <<: *default_resources # Apply default resources
     environment:
+      KAFKA_BROKER: "kafka1:9092,kafka2:9093,kafka3:9094"
+      KAFKA_TOPIC_ORDER_CREATED: "order-created"
       DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
     depends_on:
       - db
+      - kafka1
+      - kafka2
+      - kafka3
     expose:
       - "3010" # Internal port, not publicly exposed
 
   payment:
     image: payment-service:latest
+    <<: *default_resources # Apply default resources
     environment:
+      KAFKA_BROKER: "kafka1:9092,kafka2:9093,kafka3:9094"
+      KAFKA_TOPIC_ORDER_CREATED: "order-created"
       DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
     depends_on:
       - db
+      - kafka1
+      - kafka2
+      - kafka3
     expose:
       - "3020" # Internal port, not publicly exposed
 
   product:
     image: product-service:latest
+    <<: *default_resources # Apply default resources
     environment:
       DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
     depends_on:
@@ -69,6 +160,7 @@ services:
 
   user:
     image: user-service:latest
+    <<: *default_resources # Apply default resources
     environment:
       DATABASE_URL: postgresql://app:xiaoshop123@postgres:5432/xiaoshop
     depends_on:

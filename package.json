@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build-start": "npm run docker:build && npm run docker-compose:start",
     "docker:build": "sh ./scripts/build_docker_images.sh",
     "docker-compose:start": "cd scripts && sh ./start_docker_compose.sh"
   },
