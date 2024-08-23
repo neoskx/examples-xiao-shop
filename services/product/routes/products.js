@@ -18,7 +18,7 @@ async function getPGPool() {
   try {
     await new Promise((resolve, reject) => {
       _pool.connect((err, client, done) => {
-        if (err){
+        if (err) {
           reject(err);
           throw err;
         }

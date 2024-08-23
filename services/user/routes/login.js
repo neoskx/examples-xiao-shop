@@ -1,4 +1,5 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 // const debug = require('debug')('user:api');
 const { Pool } = require('pg');
 
@@ -18,7 +19,7 @@ async function getPGPool() {
   try {
     await new Promise((resolve, reject) => {
       _pool.connect((err, client, done) => {
-        if (err){
+        if (err) {
           reject(err);
           throw err;
         }
@@ -39,6 +40,12 @@ async function getPGPool() {
   }
 
   return _pool;
+}
+
+if (process.env.NODE_MODE === 'dev') {
+  router.get('/', async (req, res) => {
+    res.json({ test: 'ok' });
+  });
 }
 
 router.post('/', async (req, res) => {

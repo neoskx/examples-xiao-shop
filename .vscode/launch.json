@@ -4,9 +4,33 @@
   "configurations": [
     {
       "type": "node",
-      "name": "Debug API",
+      "name": "Debug Gateway",
       "request": "attach",
       "port": 9229
+    },
+    {
+      "type": "node",
+      "name": "Debug Order",
+      "request": "attach",
+      "port": 9239
+    },
+    {
+      "type": "node",
+      "name": "Debug Payment",
+      "request": "attach",
+      "port": 9249
+    },
+    {
+      "type": "node",
+      "name": "Debug Product",
+      "request": "attach",
+      "port": 9259
+    },
+    {
+      "type": "node",
+      "name": "Debug User",
+      "request": "attach",
+      "port": 9269
     }
   ]
 }

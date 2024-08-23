@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "DEBUG=payment:server node ./bin/www",
-    "dev": "DEBUG=payment:* nodemon --inspect=9229 ./bin/www"
+    "dev": "DEBUG=payment:* nodemon --inspect=9249 ./bin/www"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
